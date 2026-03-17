@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(RECEPTION)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Member {
+  id        Int          @id @default(autoincrement())
+  name      String
+  phone     String       @unique
+  email     String?
+  plan      PlanType
+  status    MemberStatus @default(ACTIVE)
+  joinedAt  DateTime     @default(now())
+  expiresAt DateTime
+  trainerId Int?
+  trainer   Trainer?     @relation(fields: [trainerId], references: [id])
+  payments  Payment[]
+  bookings  Booking[]
+  checkIns  CheckIn[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model Trainer {
+  id         Int           @id @default(autoincrement())
+  name       String
+  phone      String        @unique
+  email      String?
+  speciality String
+  bio        String?
+  rating     Float         @default(0)
+  status     TrainerStatus @default(ACTIVE)
+  members    Member[]
+  classes    Class[]
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
+
+model Class {
+  id        Int       @id @default(autoincrement())
+  name      String
+  trainerId Int
+  trainer   Trainer   @relation(fields: [trainerId], references: [id])
+  day       String
+  time      String
+  duration  Int
+  capacity  Int
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Payment {
+  id       Int           @id @default(autoincrement())
+  memberId Int
+  member   Member        @relation(fields: [memberId], references: [id])
+  amount   Float
+  method   PaymentMethod
+  status   PaymentStatus @default(PENDING)
+  dueDate  DateTime
+  paidAt   DateTime?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model Equipment {
+  id          Int             @id @default(autoincrement())
+  name        String
+  zone        String
+  quantity    Int
+  condition   Int             @default(100)
+  lastService DateTime?
+  status      EquipmentStatus @default(GOOD)
+  logs        MaintenanceLog[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model MaintenanceLog {
+  id          Int              @id @default(autoincrement())
+  equipmentId Int
+  equipment   Equipment        @relation(fields: [equipmentId], references: [id])
+  issue       String
+  status      MaintenanceStatus @default(OPEN)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Booking {
+  id        Int      @id @default(autoincrement())
+  memberId  Int
+  member    Member   @relation(fields: [memberId], references: [id])
+  classId   Int
+  class     Class    @relation(fields: [classId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model CheckIn {
+  id        Int      @id @default(autoincrement())
+  memberId  Int
+  member    Member   @relation(fields: [memberId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  RECEPTION
+  TRAINER
+}
+
+enum PlanType {
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+}
+
+enum MemberStatus {
+  ACTIVE
+  FROZEN
+  EXPIRED
+}
+
+enum TrainerStatus {
+  ACTIVE
+  ON_LEAVE
+}
+
+enum PaymentMethod {
+  UPI
+  CARD
+  CASH
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+  OVERDUE
+}
+
+enum EquipmentStatus {
+  GOOD
+  SERVICE_DUE
+  UNDER_REPAIR
+}
+
+enum MaintenanceStatus {
+  OPEN
+  SCHEDULED
+  FIXED
+  DONE
+}
