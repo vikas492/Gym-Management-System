@@ -20,12 +20,14 @@ const PORT = process.env.PORT || 5000
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://gym-management-system-l759.vercel.app'
+    'https://gym-management-system-l759.vercel.app',
+    'https://gym-management-system-l759-hqdymfo5x.vercel.app',
+    'https://gym-management-system-git-39c015-vikaszende2004-9662s-projects.vercel.app'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
-}))
+}));
 
 app.use(express.json())
 
